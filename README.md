@@ -45,6 +45,10 @@ To start with the challenge it is necessary to install the ROS packages of the r
     In order to use the host computer resources in a better way, it is possible to install ROS(melodic or noetic) and the necessary packages to run the challenge simulation.
 </details>
 
+## Reference 
+1. [Robocup github Template](https://github.com/mathworks-robotics/templates-robocup-robot-manipulation-challenge)
+
+2. [Matlab pick and place tutorial](https://www.mathworks.com/help/robotics/ug/pick-and-place-workflow-in-gazebo-using-ros.html)
 
 <!-- * kortex_control
 * ros-controllers

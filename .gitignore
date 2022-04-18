@@ -1,0 +1,6 @@
+# VSCode files
+.vscode
+.vs
+
+# MATLAB files
+*.asv

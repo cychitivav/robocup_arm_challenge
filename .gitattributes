@@ -1,0 +1,7 @@
+*.docx binary diff=word
+*.exe binary
+*.jpg binary
+*.pdf binary
+*.png binary
+*.xlsx binary
+*.dlm binary
