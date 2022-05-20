@@ -84,14 +84,6 @@ In order to use the host computer resources in a better way, it is possible to i
 </p>
 </details>
 
-<!-- ## Package creation 
-In order to create a package with just one launch file, we create a new package:
-
-```bash
-catkin create pkg robocup -m "Cristian Chitiva" "cychitivav@unal.edu.co" -m "Sebastian Duenas" "jsduenass@unal.edu.co" -l "MIT" --catkin-deps rospy kortex_gazebo_depth
-``` -->
-
-
 
 
 ## References 

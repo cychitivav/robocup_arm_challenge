@@ -1,14 +1,19 @@
 clear, clc, close all
 %% Connect to ROS Network
-rosshutdown
-rosinit('localhost',11311)
-%% Load robot model and set initial config
+rosshutdown;
+rosinit
+
+%% Load robot model
 load('exampleHelperKINOVAGen3GripperROSGazebo.mat');
+
 currentRobotJConfig = homeConfiguration(robot);
 
+%% Initialize 
 RoboCupManipulation_setInitialConfig;
 physicsClient = rossvcclient('gazebo/unpause_physics');
 call(physicsClient,'Timeout',3);
+
+
 %% Configure ROS subscriber 
 joint_state_sub = rossubscriber('/my_gen3/joint_states');
 ros_action = '/my_gen3/gen3_joint_trajectory_controller/follow_joint_trajectory';
@@ -16,6 +21,7 @@ ros_action = '/my_gen3/gen3_joint_trajectory_controller/follow_joint_trajectory'
 
 rgbImgSub = rossubscriber('/camera/color/image_raw');     % camera sensor
 rgbDptSub = rossubscriber('/camera/depth/image_raw');     % depth sensor
+
 %% Test image processing
 
 curImage = receive(rgbImgSub);
