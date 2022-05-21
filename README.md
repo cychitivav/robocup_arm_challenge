@@ -97,6 +97,9 @@ first aproach consist in [^pick-place]
 rosrun joint_state_publisher_gui joint_state_publisher_gui
 -->
 
+KINOVA Gen3 manipulator
+
+[robot manipulation function list](https://www.mathworks.com/help/robotics/referencelist.html?type=function&listtype=cat&category=manipulators&blocktype=all&capability=)
 
 ```bash 
 export ROS_NAMESPACE=/my_gen3

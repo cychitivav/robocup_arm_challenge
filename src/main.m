@@ -2,12 +2,15 @@ clear, clc, close all
 %% Connect to ROS Network
 
 device = rosdevice('localhost');
-if ~isCoreRunning(device)
-    shellLibraries = 'export LD_LIBRARY_PATH="~/catkin_ws/devel/lib:/opt/ros/noetic/lib"';
-    shellRunGazebo = 'roslaunch kortex_gazebo_depth pickplace.launch world:=RoboCup_1.world';    
-    [status,cmdout] = system([shellLibraries ';' shellRunGazebo '&  echo $!'])
+ 
+if ~isCoreRunning(device) % run roslaunch ROSdistribution: Noetic
+    bashConfig='source /opt/ros/noetic/setup.bash; source ~/catkin_ws/devel/setup.bash';
+    bashLibraries = 'export LD_LIBRARY_PATH="~/catkin_ws/devel/lib:/opt/ros/noetic/lib"'
+    bashRunGazebo = 'roslaunch kortex_gazebo_depth pickplace.launch world:=RoboCup_1.world';    
+    [status,cmdout] = system([bashConfig ';' bashLibraries ';' bashRunGazebo '&  echo $!'])
+    % system([bashConfig ';' bashLibraries ';' bashRunGazebo])
     % system(['kill' cmdout]);   % end ros process 
-    % system('killall -9 rosmaster')
+    % system('killall -9 -v rosmaster')
     pause(7)
 end
 
