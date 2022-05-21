@@ -4,10 +4,11 @@ clear, clc, close all
 device = rosdevice('localhost');
 if ~isCoreRunning(device)
     shellLibraries = 'export LD_LIBRARY_PATH="~/catkin_ws/devel/lib:/opt/ros/noetic/lib"';
-    shellRunGazebo = 'roslaunch kortex_gazebo_depth pickplace.launch world:=RoboCup_1.world &';    
-    [status,cmdout] = system([shellLibraries ';' shellRunGazebo])
-    % system('kill', cmdout);   % end ros process 
-    pause(5)
+    shellRunGazebo = 'roslaunch kortex_gazebo_depth pickplace.launch world:=RoboCup_1.world';    
+    [status,cmdout] = system([shellLibraries ';' shellRunGazebo '&  echo $!'])
+    % system(['kill' cmdout]);   % end ros process 
+    % system('killall -9 rosmaster')
+    pause(7)
 end
 
 rosshutdown;
