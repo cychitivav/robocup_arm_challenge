@@ -86,9 +86,22 @@ In order to use the host computer resources in a better way, it is possible to i
 
 
 
-To launch ROS inside matlab  inside you can use 'system' to run shell commands but ROS requieres some libraries so you need to link them as shown here `system(['export LD_LIBRARY_PATH="LD_path";' 'roslaunch xyz.launch &']);` where the *LD_path* is a place holder for the path of the library that can be found by running in shell `echo $LD_LIBRARY_PATH` [^rosMatlab]
+To launch ROS inside matlab  inside you can use 'system' to run shell commands but ROS requieres some libraries so you need to link them as shown here `status,cmdout] = system(['export LD_LIBRARY_PATH="LD_path";' 'roslaunch xyz.launch &' 'echo $!']);` where the *LD_path* is a place holder for the path of the library that can be found by running in shell `echo $LD_LIBRARY_PATH` [^rosMatlab]
+
+be sure to kill all the ROS process that are running in the background you can use `system('kill', cmdout)` in matlab or the shell command ` killall -9 rosmaster` 
+> _warning_: be weary that this last command can kill all other ROS instances 
 
 first aproach consist in [^pick-place]
+
+<!--
+rosrun joint_state_publisher_gui joint_state_publisher_gui
+-->
+
+
+```bash 
+export ROS_NAMESPACE=/my_gen3
+rosrun rviz rviz -d  rviz/config.rviz
+``` 
 
 ## References 
 

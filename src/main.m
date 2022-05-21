@@ -41,6 +41,12 @@ img = readImage(ImgSub.LatestMessage);
 curDepth = receive(DptSub);
 depth = readImage(DptSub.LatestMessage); 
 %depth=uint8(depth*255);
+%ptCloudOut = pctransform(ptCloudIn,tform)
+%% send trajectory commands
+
+m = rosmessage('trajectory_msgs/JointTrajectoryPoint')
+%rostopic  info /my_gen3/joint_states
+
 %%
 pause(1)
 action='close'
