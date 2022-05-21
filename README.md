@@ -1,5 +1,5 @@
 # RoboCup Autonomous Robot Manipulation Challenge
-This repository contains the development of the RoboCup Autonomous Robot Manipulation(ARM) Challenge, which consist in the implementation of perception and control algorithms in MATLAB and Simulink to grasp and manipulate bottles and cans within a table to classify them into two bins.
+This repository contains the development of the RoboCup Autonomous Robot Manipulation(ARM) Challenge, which consist in the implementation of perception and control algorithms in MATLAB and Simulink to grasp and manipulate bottles and cans within a table to classify them into two bins. [^template]
 
 
 ## Set-up
@@ -86,7 +86,14 @@ In order to use the host computer resources in a better way, it is possible to i
 
 
 
-## References 
-1. [Robocup github Template](https://github.com/mathworks-robotics/templates-robocup-robot-manipulation-challenge)
+To launch ROS inside matlab  inside you can use 'system' to run shell commands but ROS requieres some libraries so you need to link them as shown here `system(['export LD_LIBRARY_PATH="LD_path";' 'roslaunch xyz.launch &']);` where the *LD_path* is a place holder for the path of the library that can be found by running in shell `echo $LD_LIBRARY_PATH` [^rosMatlab]
 
-2. [Matlab pick and place tutorial](https://www.mathworks.com/help/robotics/ug/pick-and-place-workflow-in-gazebo-using-ros.html)
+first aproach consist in [^pick-place]
+
+## References 
+
+[^rosMatlab]: [roslaunch-on-matlab](https://answers.ros.org/question/255008/roslaunch-on-matlab/)
+
+[^template]: [Robocup github Template](https://github.com/mathworks-robotics/templates-robocup-robot-manipulation-challenge)
+
+[^pick-place]: [Matlab pick and place tutorial](https://www.mathworks.com/help/robotics/ug/pick-and-place-workflow-in-gazebo-using-ros.html)

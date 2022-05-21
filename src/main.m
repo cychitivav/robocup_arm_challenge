@@ -1,7 +1,14 @@
 clear, clc, close all
 %% Connect to ROS Network
-% in the terminal run 
-% clear && roslaunch kortex_gazebo_depth pickplace.launch world:=RoboCup_1.world 
+
+device = rosdevice('localhost');
+if ~isCoreRunning(device)
+    shellLibraries = 'export LD_LIBRARY_PATH="~/catkin_ws/devel/lib:/opt/ros/noetic/lib"';
+    shellRunGazebo = 'roslaunch kortex_gazebo_depth pickplace.launch world:=RoboCup_1.world &';    
+    [status,cmdout] = system([shellLibraries ';' shellRunGazebo])
+    % system('kill', cmdout);   % end ros process 
+    pause(5)
+end
 
 rosshutdown;
 rosinit %('127.0.0.1',11311)
@@ -23,7 +30,8 @@ ros_action = '/my_gen3/gen3_joint_trajectory_controller/follow_joint_trajectory'
 
 ImgSub = rossubscriber('/camera/color/image_raw');     % camera sensor
 DptSub = rossubscriber('/camera/depth/image_raw');     % depth sensor
-
+topic='/camera/depth/points'
+sub= rossubscriber(topic)
 %% Test image processing
 
 curImage = receive(ImgSub);
