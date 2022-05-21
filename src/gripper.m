@@ -1,6 +1,6 @@
 function status = gripper(action)
     if strcmp(action,'close')
-        pos = 0.02;
+        pos = 0.04;
     elseif strcmp(action,'open')
         pos = 0;
     else
@@ -17,7 +17,8 @@ function status = gripper(action)
     gripGoal.Command = gripperCommand;
 
     waitForServer(gripClient);
-    sendGoal(gripClient,gripGoal);
-
-    status = true;
+    result = sendGoalAndWait(gripClient,gripGoal);
+    
+    status = result.ReachedGoal;
+    gripClient.delete;
 end
