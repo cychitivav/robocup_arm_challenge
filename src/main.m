@@ -48,30 +48,12 @@ depth = readImage(DptSub.LatestMessage);
 
 xyz = rosReadXYZ(receive(ptcSub));
 
-% clean data  
-invalid=any(isnan(xyz),2);
-xyz(invalid,:)=[];
-xyz=double(xyz);
-cdata=reshape(permute(img,[2,1,3]),[],3);
-cdata(invalid,:)=[];
-
-%data to pointcloud
-ptCloud =  pointCloud(xyz);
-ptCloud.Color= cdata;
-
+%% pointcloud  enviroment estimation
 % reference frame transformation
 get_joint_msg = receive(joint_state_sub,1);
 q_m = get_joint_msg.Position(2:8);
 
-MTH = getTransform(robot,q_m','camera')
-%pose_prima=MTH*pose;
-
-rot=MTH(1:3,1:3);
-trans=MTH(1:3,4)';
-tform = rigid3d(rot,trans);
-pose = [xyz zeros(size(xyz,1),1)]'; 
-ptCloudSegment = pctransform(ptCloud,tform);
-%%
+ptCloudSegment = getPointCloud(xyz,img,robot,q_m);
 
 ptCloudGlobal = ptCloudSegment;
 gridStep = 0.01;
