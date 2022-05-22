@@ -1,8 +1,10 @@
 clear, clc, close all
 %% Connect to ROS Network
 device = rosdevice('localhost');
+
+runfromMATLAB = false;
  
-if ~isCoreRunning(device) % run roslaunch ROSdistribution: Noetic
+if ~isCoreRunning(device) && runfromMATLAB % run roslaunch ROSdistribution: Noetic
     bashConfig='source /opt/ros/noetic/setup.bash; source ~/catkin_ws/devel/setup.bash';
     bashLibraries = 'export LD_LIBRARY_PATH="~/catkin_ws/devel/lib:/opt/ros/noetic/lib"'
     bashRunGazebo = 'roslaunch kortex_gazebo_depth pickplace.launch world:=RoboCup_1.world';    
@@ -15,7 +17,6 @@ end
 
 rosshutdown;
 rosinit                 %('127.0.0.1',11311)
-
 %% Load robot model
 load('exampleHelperKINOVAGen3GripperROSGazebo.mat');
 bodyCam = rigidBody('camera');
@@ -23,7 +24,7 @@ addBody(robot,bodyCam,'gripper')
 currentRobotJConfig = homeConfiguration(robot);
 
 %% Initialize 
-RoboCupManipulation_setInitialConfig;
+setInitialConfig;
 physicsClient = rossvcclient('gazebo/unpause_physics');
 call(physicsClient,'Timeout',3);
 ptCloudGlobal = pointCloud([0 0 0]);  % pointcloud  enviroment estimation

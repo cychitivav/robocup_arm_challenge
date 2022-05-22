@@ -4,3 +4,12 @@
 
 # MATLAB files
 *.asv
+*slprj
+
+# RoboCup files
+*RoboCupManipulation_ROS_Control_Template.mlx
+*RoboCupManipulation_Simulink_ROS_Control.slx
+*RoboCupManipulation_computeTrajectory.m
+*RoboCupManipulation_packageJointTrajectory.m
+*RoboCupManipulation_setInitialConfig.m
+*SLActivateGripper.m

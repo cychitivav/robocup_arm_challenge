@@ -1,33 +1,32 @@
-function [ptCloudSegment,MTH] = getPointCloud(xyz,img,robot,q)
-% get pointcloud a tranformation based on the robot 
+function [ptCloudSegment, MTH] = getPointCloud(xyz, img, robot, q)
+% GETPOINTCLOUD returns the point cloud in the base_link frame
+% of the robot.
+%   ptCloudSegment = GETPOINTCLOUD(xyz,img,robot,q)
 %
-% ptCloudSegment=getPointCloud(xyz,img,robot,q)
-%
-% xzy: point cloud location
-% img: image same size as pointcloud
-% robot: robot object
-% q: robot joint state
+%   xzy: point cloud location
+%   img: image same size as pointcloud
+%   robot: robot object
+%   q: robot joint state
 
-% clean data  
-invalid=any(isnan(xyz),2);
-xyz(invalid,:)=[];
-xyz=double(xyz);
-cdata=reshape(permute(img,[2,1,3]),[],3);
-cdata(invalid,:)=[];
+% Clean data
+rowInvalid = any(isnan(xyz), 2);
+xyz(rowInvalid, :) = [];
+xyz = double(xyz);
 
+colorData = reshape(permute(img, [2, 1, 3]), [], 3);
+colorData(rowInvalid, :) = [];
+
+% Data to pointcloud
+ptCloud = pointCloud(xyz);
+ptCloud.Color = colorData;
+
+% Transform pointcloud to base_link frame
 q = q(:)';
+MTH = getTransform(robot, q, 'camera');
 
-%data to pointcloud
-ptCloud =  pointCloud(xyz);
-ptCloud.Color= cdata;
+rotm = MTH(1:3, 1:3);
+trans = MTH(1:3, 4);
+tform = rigid3d(rotm, trans');
 
-MTH = getTransform(robot,q,'camera');
-%pose_prima=MTH*pose;
-
-rot=MTH(1:3,1:3);
-trans=MTH(1:3,4)';
-tform = rigid3d(rot,trans);
-pose = [xyz zeros(size(xyz,1),1)]'; 
-ptCloudSegment = pctransform(ptCloud,tform);
-
+ptCloudSegment = pctransform(ptCloud, tform);
 end
