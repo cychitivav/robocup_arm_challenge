@@ -85,26 +85,52 @@ In order to use the host computer resources in a better way, it is possible to i
 </details>
 
 
-
 To launch ROS inside matlab  inside you can use 'system' to run shell commands but ROS requieres some libraries so you need to link them as shown here `status,cmdout] = system(['export LD_LIBRARY_PATH="LD_path";' 'roslaunch xyz.launch &' 'echo $!']);` where the *LD_path* is a place holder for the path of the library that can be found by running in shell `echo $LD_LIBRARY_PATH` [^rosMatlab]
 
 be sure to kill all the ROS process that are running in the background you can use `system('kill', cmdout)` in matlab or the shell command ` killall -9 rosmaster` 
-> _warning_: be weary that this last command can kill all other ROS instances 
+> **Warning**: be weary that this last command can kill all other ROS instances 
+
+## Notes
+
+### motion
+get position
+- subscribe to rostopic: my_gen3/joint_states
+
+set movement commands
+- rosaction: /my_gen3/gen3_joint_trajectory_controller/follow_joint_trajectory 
+- message type: control_msgs/FollowJointTrajectory
+
+
+### image processing
+## img
+- message type: sensor_msgs/Image
+## depth
+- /camera/depth/points 
+
 
 first aproach consist in [^pick-place]
 
+To visualize the robot you can use rviz. changes were made to the *kortex_realsense.xacro* inside the package *kortex_gazebo_depth*  in order to change the orientation and correctly display the point cloud. 
+
+```bash 
+export ROS_NAMESPACE=/my_gen3
+rosrun rviz rviz -d  rviz/config.rviz
+``` 
+
 <!--
 rosrun joint_state_publisher_gui joint_state_publisher_gui
+https://github.com/cychitivav/robocup_arm_challenge
+
+
+https://www.mathworks.com/help//ros/ug/work-with-specialized-ros-messages.html
+
 -->
 
 KINOVA Gen3 manipulator
 
 [robot manipulation function list](https://www.mathworks.com/help/robotics/referencelist.html?type=function&listtype=cat&category=manipulators&blocktype=all&capability=)
 
-```bash 
-export ROS_NAMESPACE=/my_gen3
-rosrun rviz rviz -d  rviz/config.rviz
-``` 
+
 
 ## References 
 

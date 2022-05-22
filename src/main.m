@@ -19,7 +19,8 @@ rosinit %('127.0.0.1',11311)
 
 %% Load robot model
 load('exampleHelperKINOVAGen3GripperROSGazebo.mat');
-
+bodyCam = rigidBody('camera');
+addBody(robot,bodyCam,'gripper')
 currentRobotJConfig = homeConfiguration(robot);
 
 %% Initialize 
@@ -50,7 +51,7 @@ xyz = rosReadXYZ(receive(ptcSub));
 % clean data  
 invalid=any(isnan(xyz),2);
 xyz(invalid,:)=[];
-xzy=double(xyz);
+xyz=double(xyz);
 cdata=reshape(permute(img,[2,1,3]),[],3);
 cdata(invalid,:)=[];
 
@@ -59,12 +60,35 @@ ptCloud =  pointCloud(xyz);
 ptCloud.Color= cdata;
 
 % reference frame transformation
-rot=eye(3);
-trans=[0 0 0];
+get_joint_msg = receive(joint_state_sub,1);
+q_m = get_joint_msg.Position(2:8);
+
+MTH = getTransform(robot,q_m','camera')
+%pose_prima=MTH*pose;
+
+rot=MTH(1:3,1:3);
+trans=MTH(1:3,4)';
 tform = rigid3d(rot,trans);
+pose = [xyz zeros(size(xyz,1),1)]'; 
+ptCloudSegment = pctransform(ptCloud,tform);
+%%
 
+ptCloudGlobal = ptCloudSegment;
+gridStep = 0.01;
+ptCloudGlobal = pcmerge(ptCloudGlobal,ptCloudSegment,gridStep);
+%% create collision mesh
+m = collisionMesh(ptCloudGlobal.Location);
 
-pcshow(ptCloud)
+%% plot point cloud
+close all
+
+pcshow(ptCloudGlobal,'MarkerSize',10)
+hold on
+%show(m)
+
+show(robot,q_m')
+hold off
+
 
 %% Robot move
 %RoboCupManipulation_setInitialConfig;
