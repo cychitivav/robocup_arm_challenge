@@ -134,7 +134,9 @@ KINOVA Gen3 manipulator
 
 [robot manipulation function list](https://www.mathworks.com/help/robotics/referencelist.html?type=function&listtype=cat&category=manipulators&blocktype=all&capability=)
 
+![pointcloud](https://user-images.githubusercontent.com/25491198/169711788-95408faa-8d59-4eca-b6e6-3c80939e5a3d.jpg)
 
+![robot](https://user-images.githubusercontent.com/25491198/169711808-82e8a16e-7d81-49fd-a57a-c8feb414d59b.svg)
 
 ## References 
 

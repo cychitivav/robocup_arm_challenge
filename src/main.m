@@ -2,7 +2,7 @@ clear, clc, close all
 %% Connect to ROS Network
 device = rosdevice('localhost');
 
-runfromMATLAB = false;
+runfromMATLAB = true;
  
 if ~isCoreRunning(device) && runfromMATLAB % run roslaunch ROSdistribution: Noetic
     bashConfig='source /opt/ros/noetic/setup.bash; source ~/catkin_ws/devel/setup.bash';
@@ -35,7 +35,7 @@ currentRobotJConfig = homeConfiguration(robot);
 showdetails(robot)
 
 %% Initialize 
-setInitialConfig;
+setInitialConfig();
 physicsClient = rossvcclient('gazebo/unpause_physics');
 call(physicsClient,'Timeout',3);
 ptCloudGlobal = pointCloud([0 0 0]);  % pointcloud  enviroment estimation
@@ -69,13 +69,33 @@ action='close'
 % plot point cloud
 
 close all
+
+subplot(2,1,1)
 pcshow(xyzGlobal,labels,'MarkerSize',10)
 hold on
 %show(m)
-
 show(robot,q_m')
 hold off
 disp("Number of clusters " + numClusters)
+view(0,90)
+
+subplot(2,2,3)
+pcshow(xyzGlobal,labels,'MarkerSize',10)
+hold on
+%show(m)
+show(robot,q_m')
+hold off
+disp("Number of clusters " + numClusters)
+view(0,0)
+
+subplot(2,2,4)
+pcshow(xyzGlobal,labels,'MarkerSize',10)
+hold on
+%show(m)
+show(robot,q_m')
+hold off
+disp("Number of clusters " + numClusters)
+view(90,0)
 % subplot(2,1,1)
 % imshow(depth)
 % subplot(2,1,2)
