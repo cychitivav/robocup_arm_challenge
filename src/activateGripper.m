@@ -1,4 +1,4 @@
-function SLActivateGripper(state)
+function activateGripper(state)
     
     persistent gripAct gripGoal gripperCommand
     
