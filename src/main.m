@@ -36,22 +36,24 @@ ros_action = '/my_gen3/gen3_joint_trajectory_controller/follow_joint_trajectory'
 ImgSub = rossubscriber('/camera/color/image_raw');     % camera sensor
 DptSub = rossubscriber('/camera/depth/image_raw');     % depth sensor
 ptcSub = rossubscriber('/camera/depth/points','DataFormat','struct')
+%% Algorith 
+% sense ->  estimate enviroment -> segment -> identify->decide-> move -> repeat
 
-%% Test image processing
-close all
+%% sense
 % get data from gazebo
 curImage = receive(ImgSub);
 img =readImage(ImgSub.LatestMessage);
 
-curDepth = receive(DptSub);
-depth = readImage(DptSub.LatestMessage); 
+% curDepth = receive(DptSub);
+% depth = readImage(DptSub.LatestMessage); 
 
 xyz = rosReadXYZ(receive(ptcSub));
 
-%% pointcloud  enviroment estimation
-% reference frame transformation
 get_joint_msg = receive(joint_state_sub,1);
 q_m = get_joint_msg.Position(2:8);
+
+%% estimate enviroment
+% pointcloud  enviroment estimation
 
 ptCloudSegment = getPointCloud(xyz,img,robot,q_m);
 
@@ -59,17 +61,13 @@ ptCloudGlobal = ptCloudSegment;
 gridStep = 0.01;
 ptCloudGlobal = pcmerge(ptCloudGlobal,ptCloudSegment,gridStep);
 %% create collision mesh
-m = collisionMesh(ptCloudGlobal.Location);
+distance=0.05;
+[labels, numClusters]=pcsegdist(ptCloudGlobal,distance);
+disp("Number of clusters " + numClusters)
+xyzGlobal = ptCloudGlobal.Location;
 
-%% plot point cloud
-close all
+m = collisionMesh(xyzGlobal);
 
-pcshow(ptCloudGlobal,'MarkerSize',10)
-hold on
-%show(m)
-
-show(robot,q_m')
-hold off
 
 
 %% Robot move
@@ -87,20 +85,25 @@ msg = packageJointTrajectory(trajGoalMsg,q,qd,qdd,trajTimes)
 waitForServer(trajAct);
 sendGoalAndWait(trajAct,msg)
 
-%% send trajectory commands
 
-m = rosmessage('trajectory_msgs/JointTrajectoryPoint')
-%rostopic  info /my_gen3/joint_states
-
-%%
+%% test gripper
 pause(1)
 action='close'
 
 % action='open'
 % gripper(action)
 %% Plot
+% plot point cloud
+
 close all
-subplot(2,1,1)
-imshow(depth)
-subplot(2,1,2)
-imshow(img)
+pcshow(xyzGlobal,labels,'MarkerSize',10)
+hold on
+%show(m)
+
+show(robot,q_m')
+hold off
+
+% subplot(2,1,1)
+% imshow(depth)
+% subplot(2,1,2)
+% imshow(img)

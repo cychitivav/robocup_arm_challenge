@@ -91,6 +91,9 @@ be sure to kill all the ROS process that are running in the background you can u
 > **Warning**: be weary that this last command can kill all other ROS instances 
 
 ## Notes
+### Algorith 
+sense ->  estimate enviroment -> segment -> identify->decide-> move -> repeat
+
 
 ### motion
 get position
@@ -102,9 +105,9 @@ set movement commands
 
 
 ### image processing
-## img
+#### img
 - message type: sensor_msgs/Image
-## depth
+#### depth
 - /camera/depth/points 
 
 
