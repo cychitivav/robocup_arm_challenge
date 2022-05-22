@@ -110,6 +110,7 @@ set movement commands
 #### depth
 - /camera/depth/points 
 
+Image Labeler Matlab App
 
 first aproach consist in [^pick-place]
 
