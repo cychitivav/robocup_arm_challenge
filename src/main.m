@@ -1,6 +1,5 @@
 clear, clc, close all
 %% Connect to ROS Network
-
 device = rosdevice('localhost');
  
 if ~isCoreRunning(device) % run roslaunch ROSdistribution: Noetic
@@ -15,7 +14,7 @@ if ~isCoreRunning(device) % run roslaunch ROSdistribution: Noetic
 end
 
 rosshutdown;
-rosinit %('127.0.0.1',11311)
+rosinit                 %('127.0.0.1',11311)
 
 %% Load robot model
 load('exampleHelperKINOVAGen3GripperROSGazebo.mat');
@@ -27,16 +26,19 @@ currentRobotJConfig = homeConfiguration(robot);
 RoboCupManipulation_setInitialConfig;
 physicsClient = rossvcclient('gazebo/unpause_physics');
 call(physicsClient,'Timeout',3);
+ptCloudGlobal = pointCloud([0 0 0])  % pointcloud  enviroment estimation
 
-%% Configure ROS subscribers
+%% Configure ROS nodes
+% get joint_state
 joint_state_sub = rossubscriber('/my_gen3/joint_states');
+% send joint states commands
 ros_action = '/my_gen3/gen3_joint_trajectory_controller/follow_joint_trajectory';
 [trajAct,trajGoalMsg] = rosactionclient(ros_action);
-
+% receive image data
 ImgSub = rossubscriber('/camera/color/image_raw');     % camera sensor
-DptSub = rossubscriber('/camera/depth/image_raw');     % depth sensor
+% receive cloudpoint data
 ptcSub = rossubscriber('/camera/depth/points','DataFormat','struct')
-%% Algorith 
+%% Algorith description
 % sense ->  estimate enviroment -> segment -> identify->decide-> move -> repeat
 
 %% sense
@@ -44,39 +46,36 @@ ptcSub = rossubscriber('/camera/depth/points','DataFormat','struct')
 curImage = receive(ImgSub);
 img =readImage(ImgSub.LatestMessage);
 
-% curDepth = receive(DptSub);
-% depth = readImage(DptSub.LatestMessage); 
-
 xyz = rosReadXYZ(receive(ptcSub));
 
 get_joint_msg = receive(joint_state_sub,1);
 q_m = get_joint_msg.Position(2:8);
+% sensed data: xyz, img, q_m
 
 %% estimate enviroment
 % pointcloud  enviroment estimation
-
 ptCloudSegment = getPointCloud(xyz,img,robot,q_m);
-
-ptCloudGlobal = ptCloudSegment;
 gridStep = 0.01;
 ptCloudGlobal = pcmerge(ptCloudGlobal,ptCloudSegment,gridStep);
-%% create collision mesh
-distance=0.05;
-[labels, numClusters]=pcsegdist(ptCloudGlobal,distance);
+%% segment 
+distance = 0.05;
+[labels, numClusters] = pcsegdist(ptCloudGlobal,distance);
 disp("Number of clusters " + numClusters)
+%% identify 
+
+%% decide 
+% create collision mesh
 xyzGlobal = ptCloudGlobal.Location;
 
 m = collisionMesh(xyzGlobal);
 
-
+target = q_m-[0.5 0 0 0 0 0 0]';
 
 %% Robot move
 %RoboCupManipulation_setInitialConfig;
 
 zeroVals = zeros(7,1);
-get_joint_msg = receive(joint_state_sub,1);
-q_m = get_joint_msg.Position(2:8);
-q = q_m-[0.5 0 0 0 0 0 0]';
+q = target;
 qd = zeroVals;
 qdd = zeroVals;
 t=rostime('now');
@@ -86,7 +85,7 @@ waitForServer(trajAct);
 sendGoalAndWait(trajAct,msg)
 
 
-%% test gripper
+% test gripper
 pause(1)
 action='close'
 
