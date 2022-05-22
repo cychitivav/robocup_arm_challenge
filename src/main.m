@@ -36,6 +36,20 @@ ImgSub = rossubscriber('/camera/color/image_raw');     % camera sensor
 DptSub = rossubscriber('/camera/depth/image_raw');     % depth sensor
 topic='/camera/depth/points'
 sub= rossubscriber(topic)
+%% Robot move
+%RoboCupManipulation_setInitialConfig;
+
+zeroVals = zeros(7,1);
+get_joint_msg = receive(joint_state_sub,1);
+q_m = get_joint_msg.Position(2:8);
+q = q_m-[0.5 0 0 0 0 0 0]';
+qd = zeroVals;
+qdd = zeroVals;
+t=rostime('now');
+trajTimes = 2;
+msg = packageJointTrajectory(trajGoalMsg,q,qd,qdd,trajTimes)
+waitForServer(trajAct);
+sendGoalAndWait(trajAct,msg)
 %% Test image processing
 
 curImage = receive(ImgSub);
