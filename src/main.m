@@ -34,8 +34,38 @@ ros_action = '/my_gen3/gen3_joint_trajectory_controller/follow_joint_trajectory'
 
 ImgSub = rossubscriber('/camera/color/image_raw');     % camera sensor
 DptSub = rossubscriber('/camera/depth/image_raw');     % depth sensor
-topic='/camera/depth/points'
-sub= rossubscriber(topic)
+ptcSub = rossubscriber('/camera/depth/points','DataFormat','struct')
+
+%% Test image processing
+close all
+% get data from gazebo
+curImage = receive(ImgSub);
+img =readImage(ImgSub.LatestMessage);
+
+curDepth = receive(DptSub);
+depth = readImage(DptSub.LatestMessage); 
+
+xyz = rosReadXYZ(receive(ptcSub));
+
+% clean data  
+invalid=any(isnan(xyz),2);
+xyz(invalid,:)=[];
+xzy=double(xyz);
+cdata=reshape(permute(img,[2,1,3]),[],3);
+cdata(invalid,:)=[];
+
+%data to pointcloud
+ptCloud =  pointCloud(xyz);
+ptCloud.Color= cdata;
+
+% reference frame transformation
+rot=eye(3);
+trans=[0 0 0];
+tform = rigid3d(rot,trans);
+
+
+pcshow(ptCloud)
+
 %% Robot move
 %RoboCupManipulation_setInitialConfig;
 
@@ -50,15 +80,7 @@ trajTimes = 2;
 msg = packageJointTrajectory(trajGoalMsg,q,qd,qdd,trajTimes)
 waitForServer(trajAct);
 sendGoalAndWait(trajAct,msg)
-%% Test image processing
 
-curImage = receive(ImgSub);
-img = readImage(ImgSub.LatestMessage);
-
-curDepth = receive(DptSub);
-depth = readImage(DptSub.LatestMessage); 
-%depth=uint8(depth*255);
-%ptCloudOut = pctransform(ptCloudIn,tform)
 %% send trajectory commands
 
 m = rosmessage('trajectory_msgs/JointTrajectoryPoint')
