@@ -6,7 +6,7 @@ runfromMATLAB = false;
  
 if ~isCoreRunning(device) && runfromMATLAB % run roslaunch ROSdistribution: Noetic
     bashConfig='source /opt/ros/noetic/setup.bash; source ~/catkin_ws/devel/setup.bash';
-    bashLibraries = 'export LD_LIBRARY_PATH="~/catkin_ws/devel/lib:/opt/ros/noetic/lib"'
+    bashLibraries = 'export LD_LIBRARY_PATH="~/catkin_ws/devel/lib:/opt/ros/noetic/lib"';
     bashRunGazebo = 'roslaunch kortex_gazebo_depth pickplace.launch world:=RoboCup_1.world';    
     [status,cmdout] = system([bashConfig ';' bashLibraries ';' bashRunGazebo '&  echo $!'])
     % system([bashConfig ';' bashLibraries ';' bashRunGazebo])
@@ -19,9 +19,20 @@ rosshutdown;
 rosinit                 %('127.0.0.1',11311)
 %% Load robot model
 load('exampleHelperKINOVAGen3GripperROSGazebo.mat');
+
 bodyCam = rigidBody('camera');
-addBody(robot,bodyCam,'gripper')
+camera_MTH = trvec2tform([0 -0.055 -0.055])*eul2tform([0 pi 0],'xyz');
+
+jnt = rigidBodyJoint('jnt','fixed');
+setFixedTransform(jnt,camera_MTH)
+
+bodyCam.Joint = jnt;
+
+addBody(robot,bodyCam,'Bracelet_Link')
+
 currentRobotJConfig = homeConfiguration(robot);
+
+showdetails(robot)
 
 %% Initialize 
 setInitialConfig;
