@@ -1,4 +1,4 @@
-function ptCloudSegment = getPointCloud(xyz,img,robot,q)
+function [ptCloudSegment,MTH] = getPointCloud(xyz,img,robot,q)
 % get pointcloud a tranformation based on the robot 
 %
 % ptCloudSegment=getPointCloud(xyz,img,robot,q)
@@ -21,7 +21,7 @@ q = q(:)';
 ptCloud =  pointCloud(xyz);
 ptCloud.Color= cdata;
 
-MTH = getTransform(robot,q,'camera')
+MTH = getTransform(robot,q,'camera');
 %pose_prima=MTH*pose;
 
 rot=MTH(1:3,1:3);

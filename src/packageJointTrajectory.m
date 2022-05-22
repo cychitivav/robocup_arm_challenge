@@ -1,11 +1,11 @@
-function msg = packageJointTrajectory(msg,q,qd,qdd,trajTimes)
+function msg = packageJointTrajectory(msg,q,qd,qdd,trajTimes,tolerance)
 %   Copyright 2021 The MathWorks, Inc
 %
 %   This function packages the joint positions, velocities, and
 %   accelerations of the desired trajectory into ROS messages as required
 %   by ros_control for inetraction with the Gazebo environment
-
-%    m = rosmessage('trajectory_msgs/JointTrajectoryPoint');
+%   tolerance: vector 1x3 [position, velocity, acceleration] tolerance
+   
     % Initialize values
     N = numel(trajTimes);
     numJoints = size(q,1);
@@ -18,9 +18,9 @@ function msg = packageJointTrajectory(msg,q,qd,qdd,trajTimes)
     for idx = 1:numJoints
         msg.GoalTolerance(idx) = rosmessage('control_msgs/JointTolerance');
         msg.GoalTolerance(idx).Name = jointNames{idx};
-        msg.GoalTolerance(idx).Position = 0.3;
-        msg.GoalTolerance(idx).Velocity = 0.1;
-        msg.GoalTolerance(idx).Acceleration = 0.1;
+        msg.GoalTolerance(idx).Position = tolerance(1);
+        msg.GoalTolerance(idx).Velocity = tolerance(2);
+        msg.GoalTolerance(idx).Acceleration = tolerance(3);
     end
     
     % Loop through waypoints and fill in their data

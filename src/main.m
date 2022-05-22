@@ -54,13 +54,13 @@ q_m = get_joint_msg.Position(2:8);
 
 %% estimate enviroment
 % pointcloud  enviroment estimation
-ptCloudSegment = getPointCloud(xyz,img,robot,q_m);
+[ptCloudSegment,MTH] = getPointCloud(xyz,img,robot,q_m);
 gridStep = 0.01;
 ptCloudGlobal = pcmerge(ptCloudGlobal,ptCloudSegment,gridStep);
 %% segment 
 distance = 0.05;
 [labels, numClusters] = pcsegdist(ptCloudGlobal,distance);
-disp("Number of clusters " + numClusters)
+
 %% identify 
 
 %% decide 
@@ -68,8 +68,16 @@ disp("Number of clusters " + numClusters)
 xyzGlobal = ptCloudGlobal.Location;
 
 m = collisionMesh(xyzGlobal);
+ik = inverseKinematics('RigidBodyTree',robot);
+pos_move=[0 0 -0.1] ;
+rot_move= [0 0 -pi/10];
+MTH_target= trvec2tform(pos_move)*eul2tform(rot_move)*MTH;
+weights = [0.25 0.25 0.25 1 1 1];
+initialguess = q_m';
+[configSoln,solnInfo] = ik('camera',MTH_target,weights,initialguess);
 
-target = q_m-[0.5 0 0 0 0 0 0]';
+
+target = configSoln';
 
 %% Robot move
 %RoboCupManipulation_setInitialConfig;
@@ -80,7 +88,8 @@ qd = zeroVals;
 qdd = zeroVals;
 t=rostime('now');
 trajTimes = 2;
-msg = packageJointTrajectory(trajGoalMsg,q,qd,qdd,trajTimes)
+tolerance = [0.3 0.1 0.1];
+msg = packageJointTrajectory(trajGoalMsg,q,qd,qdd,trajTimes,tolerance)
 waitForServer(trajAct);
 sendGoalAndWait(trajAct,msg)
 
@@ -101,7 +110,7 @@ hold on
 
 show(robot,q_m')
 hold off
-
+disp("Number of clusters " + numClusters)
 % subplot(2,1,1)
 % imshow(depth)
 % subplot(2,1,2)
