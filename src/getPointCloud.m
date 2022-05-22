@@ -1,12 +1,13 @@
-function [ptCloudSegment, MTH] = getPointCloud(xyz, img, robot, q)
+function ptCloudWorld = getPointCloud(xyz, img, robot, q)
 % GETPOINTCLOUD returns the point cloud in the base_link frame
 % of the robot.
-%   ptCloudSegment = GETPOINTCLOUD(xyz,img,robot,q)
+%   ptCloud = GETPOINTCLOUD(xyz,img,robot,q)
 %
 %   xzy: point cloud location
 %   img: image same size as pointcloud
 %   robot: robot object
 %   q: robot joint state
+%   ptCloud: point cloud respect to base_link frame
 
 % Clean data
 rowInvalid = any(isnan(xyz), 2);
@@ -16,17 +17,21 @@ xyz = double(xyz);
 colorData = reshape(permute(img, [2, 1, 3]), [], 3);
 colorData(rowInvalid, :) = [];
 
-% Data to pointcloud
+% Data to point cloud
 ptCloud = pointCloud(xyz);
 ptCloud.Color = colorData;
 
-% Transform pointcloud to base_link frame
-q = q(:)';
-MTH = getTransform(robot, q, 'camera');
+% Transform point cloud to base_link frame
+MTH = getTransform(robot, q, 'camera','base_link')
 
 rotm = MTH(1:3, 1:3);
 trans = MTH(1:3, 4);
 tform = rigid3d(rotm, trans');
 
-ptCloudSegment = pctransform(ptCloud, tform);
+pose = [xyz ones(size(xyz,1),1)]';
+
+poseWorld = MTH*pose;
+
+ptCloudWorld = pctransform(ptCloud, tform);
+% ptCloudWorld = pointCloud(poseWorld(1:3,:)');
 end
