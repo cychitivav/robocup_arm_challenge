@@ -6,13 +6,14 @@ inspectionPoses = cat(3, ...
 
 ptCloud = sense(robot, ROSobjects);
 
-% for i = 1:size(inspectionPoses, 3)
-%     moveto(robot, inspectionPoses(:, :, i), ROSobjects);
-%     pcCurrent = sense(robot, ROSobjects);
-% 
-%     gridStep = 0.01;
-%     ptCloud = pcmerge(ptCloud, pcCurrent, gridStep);
-% end
+for i = 1:size(inspectionPoses, 3)
+    moveto(robot, inspectionPoses(:, :, i), ROSobjects);
+    pause(3)
+    pcCurrent = sense(robot, ROSobjects);
+
+    gridStep = 0.001;
+    ptCloud = pcmerge(ptCloud, pcCurrent, gridStep);
+end
 
 msh = collisionMesh(ptCloud.Location);
 

@@ -22,16 +22,11 @@ ptCloud = pointCloud(xyz);
 ptCloud.Color = colorData;
 
 % Transform point cloud to base_link frame
-MTH = getTransform(robot, q, 'camera','base_link')
+MTH = getTransform(robot, q, 'camera', 'base_link');
 
-rotm = MTH(1:3, 1:3);
-trans = MTH(1:3, 4);
-tform = rigid3d(rotm, trans');
+pose = [xyz ones(size(xyz, 1), 1)]';
+poseWorld = MTH * pose;
 
-pose = [xyz ones(size(xyz,1),1)]';
-
-poseWorld = MTH*pose;
-
-ptCloudWorld = pctransform(ptCloud, tform);
-% ptCloudWorld = pointCloud(poseWorld(1:3,:)');
+ptCloudWorld = pointCloud(poseWorld(1:3, :)');
+ptCloudWorld.Color = colorData;
 end
