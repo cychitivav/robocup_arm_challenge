@@ -2,7 +2,7 @@ clear, clc, close all
 %% Connect to ROS Network
 device = rosdevice('localhost');
 
-runfromMATLAB = false;
+runfromMATLAB = true;
  
 if ~isCoreRunning(device) && runfromMATLAB % run roslaunch ROSdistribution: Noetic
     bashConfig='source /opt/ros/noetic/setup.bash; source ~/catkin_ws/devel/setup.bash';
@@ -13,6 +13,8 @@ if ~isCoreRunning(device) && runfromMATLAB % run roslaunch ROSdistribution: Noet
     % system(['kill' cmdout]);   % end ros process 
     % system('killall -9 -v rosmaster')
     pause(7)
+    setInitialConfig();
+
 end
 
 rosshutdown;
@@ -33,7 +35,7 @@ addBody(robot,bodyCam,'Bracelet_Link')
 currentRobotJConfig = homeConfiguration(robot);
 
 %% Initialize 
-setInitialConfig();
+%setInitialConfig();
 
 physicsClient = rossvcclient('gazebo/unpause_physics');
 call(physicsClient,'Timeout',3);
@@ -50,56 +52,33 @@ ros_action_name = '/my_gen3/gen3_joint_trajectory_controller/follow_joint_trajec
 ROSobjects.trajeAction.client = trajeClient;
 ROSobjects.trajeAction.goalMsg = trajeGoalMsg;
 %% Algorithm description
-% sense ->  estimate environment -> segment -> identify-> decide -> move -> repeat
-[ptCloud, msh] = estimate(robot, ROSobjects);
+% sense ->  estimate environment -> segment -> identify-> plot -> move -> repeat
+inspectionPoses = cat(3, ...
+trvec2tform([0.4 -0.25 0.5]) * eul2tform(deg2rad([-160 10 0]), 'xyz'), ...
+trvec2tform([0.4 0.25 0.5]) * eul2tform(deg2rad([160 10 0]), 'xyz'));
 
-current_joint_state = ROSobjects.jntStateSub.LatestMessage;
-q = current_joint_state.Position(2:8);
+blueBinPose = trvec2tform([-0.1310 0.2910 0.7130]) * eul2tform([0 0 0],'xyz');
+greenBinPose = trvec2tform([0 0 0]) * eul2tform([0 0 0],'xyz');
+pcWorld = sense(robot,ROSobjects);
+    %% sense 
+    [pcCurrent,img,q] = sense(robot,ROSobjects);
+    
+    %% estimate enviroment
+    pcWorld = updateWorld(robot, ROSobjects,pcCurrent,pcWorld)
+    
+    %% segment
+    distance = 0.05;
+    [labels, numClusters] = pcsegdist(pcWorld, distance);
+    msh = collisionMesh(pcWorld.Location);
+    %% identify 
+     
+    pos_move = [0 0 -0.1];
+    rot_move = [0 0 -pi / 10];
 
-close all
-figure(1)
-show(robot,q')  
-hold on
-pcshow(ptCloud)
-axis tight
+    MTH_target = blueBinPose;
+    %% plot
+    run plotInfo.m
+    
+    %% move 
+    moveto(robot, qCurrent,Tgoal, ROSobjects)
 
-% %%
-% tic
-% [msg,xyzGlobal,labels,numClusters, q_m,MTH_target] = algorithm(ROSobjects,trajeGoalMsg,robot,ptCloudGlobal);
-% time_spent=toc;
-% sendGoalAndWait(ROSobjects.trajeAct,msg)
-% 
-% %% Plot
-% % plot point cloud
-% close all
-% 
-% subplot(2,1,1)
-% pcshow(xyzGlobal,labels,'MarkerSize',10)
-% hold on
-% %show(m)
-% show(robot,q_m')
-% hold off
-% disp("Number of clusters " + numClusters)
-% view(0,90)
-% 
-% subplot(2,2,3)
-% pcshow(xyzGlobal,labels,'MarkerSize',10)
-% hold on
-% %show(m)
-% show(robot,q_m')
-% hold off
-% disp("Number of clusters " + numClusters)
-% view(0,0)
-% 
-% subplot(2,2,4)
-% pcshow(xyzGlobal,labels,'MarkerSize',10)
-% hold on
-% %show(m)
-% show(robot,q_m')
-% hold off
-% disp("Number of clusters " + numClusters)
-% view(90,0)
-% % subplot(2,1,1)
-% % imshow(depth)
-% % subplot(2,1,2)
-% % imshow(img)

@@ -1,4 +1,4 @@
-function ptCloud = sense(robot,ROSobjects)
+function [ptCloud,img,q] = sense(robot,ROSobjects)
 
 ImgSub = ROSobjects.ImgSub;
 ptcSub = ROSobjects.ptcSub;
