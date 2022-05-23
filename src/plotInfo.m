@@ -1,4 +1,4 @@
-close all
+
 figure(1)
 
 xyzGlobal = pcWorld.Location;
@@ -8,7 +8,7 @@ hold on
 %show(m)
 show(robot,q');
 hold off
-title('top')
+title('Top')
 view(0,90)
 axis tight
 
@@ -21,7 +21,7 @@ hold on
 %show(m)
 show(robot,q');
 hold off
-title('lateral')
+title('Lateral')
 view(0,0)
 axis tight
 
@@ -31,10 +31,9 @@ hold on
 %show(m)
 show(robot,q');
 hold off
-title('front')
-view(90,0)
+title('Isometric')
+view(30,30)
 axis tight
 
-disp("Number of clusters " + numClusters)
 
 
