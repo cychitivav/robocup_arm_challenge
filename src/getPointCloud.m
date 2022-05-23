@@ -1,4 +1,4 @@
-function ptCloudWorld = getPointCloud(xyz, img, robot, q)
+function pcWorld = getPointCloud(xyz, img, robot, q,pcRoi)
 % GETPOINTCLOUD returns the point cloud in the base_link frame
 % of the robot.
 %   ptCloud = GETPOINTCLOUD(xyz,img,robot,q)
@@ -17,16 +17,17 @@ xyz = double(xyz);
 colorData = reshape(permute(img, [2, 1, 3]), [], 3);
 colorData(rowInvalid, :) = [];
 
-% Data to point cloud
-ptCloud = pointCloud(xyz);
-ptCloud.Color = colorData;
 
 % Transform point cloud to base_link frame
 MTH = getTransform(robot, q, 'camera', 'base_link');
 
 pose = [xyz ones(size(xyz, 1), 1)]';
 poseWorld = MTH * pose;
+xyzWorld = poseWorld(1:3, :)';
+pcWorld = pointCloud(xyzWorld);
 
-ptCloudWorld = pointCloud(poseWorld(1:3, :)');
-ptCloudWorld.Color = colorData;
+indices = findPointsInROI(pcWorld,pcRoi);
+pcWorld = pointCloud(xyzWorld(indices,:));
+pcWorld.Color = colorData(indices,:);
+
 end

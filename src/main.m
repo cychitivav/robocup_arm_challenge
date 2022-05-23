@@ -13,6 +13,8 @@ if ~isCoreRunning(device) && runfromMATLAB % run roslaunch ROSdistribution: Noet
     % system(['kill' cmdout]);   % end ros process 
     % system('killall -9 -v rosmaster')
     pause(7)
+    rosshutdown;
+    rosinit                 %('127.0.0.1',11311)
     setInitialConfig();
 
 end
@@ -59,9 +61,15 @@ trvec2tform([0.4 0.25 0.5]) * eul2tform(deg2rad([160 10 0]), 'xyz'));
 
 blueBinPose = trvec2tform([-0.1310 0.2910 0.7130]) * eul2tform([0 0 0],'xyz');
 greenBinPose = trvec2tform([0 0 0]) * eul2tform([0 0 0],'xyz');
-pcWorld = sense(robot,ROSobjects);
+
+pcRoi = [0 1 -0.5 0.5 -0.15 0.3];
+pcWorld = sense(robot,ROSobjects,pcRoi);
+
+
+waypoints ={blueBinPose,greenBinPose,blueBinPose,};
+
     %% sense 
-    [pcCurrent,img,q] = sense(robot,ROSobjects);
+    [pcCurrent,img,q] = sense(robot,ROSobjects,pcRoi);
     
     %% estimate enviroment
     pcWorld = updateWorld(robot, ROSobjects,pcCurrent,pcWorld)
@@ -80,5 +88,5 @@ pcWorld = sense(robot,ROSobjects);
     run plotInfo.m
     
     %% move 
-    moveto(robot, qCurrent,Tgoal, ROSobjects)
+    moveto(robot, q,MTH_target, ROSobjects)
 

@@ -1,4 +1,4 @@
-function [ptCloud,img,q] = sense(robot,ROSobjects)
+function [ptCloud,img,q] = sense(robot,ROSobjects,pcRoi)
 
 ImgSub = ROSobjects.ImgSub;
 ptcSub = ROSobjects.ptcSub;
@@ -12,5 +12,5 @@ xyz = rosReadXYZ(receive(ptcSub));
 current_joint_state = receive(jntStateSub);
 q = current_joint_state.Position(2:8);
 
-ptCloud = getPointCloud(xyz, img, robot, q');
+ptCloud = getPointCloud(xyz, img, robot, q',pcRoi);
 end
