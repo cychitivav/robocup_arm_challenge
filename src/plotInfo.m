@@ -1,4 +1,3 @@
-
 figure(1)
 
 xyzGlobal = pcWorld.Location;
@@ -34,6 +33,3 @@ hold off
 title('Isometric')
 view(30,30)
 axis tight
-
-
-
