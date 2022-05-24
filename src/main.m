@@ -53,13 +53,20 @@ ros_action_name = '/my_gen3/gen3_joint_trajectory_controller/follow_joint_trajec
 
 ROSobjects.trajeAction.client = trajeClient;
 ROSobjects.trajeAction.goalMsg = trajeGoalMsg;
+
+% Create client and goal message to gripper action 
+ros_action_name = '/my_gen3/custom_gripper_controller/gripper_cmd';
+[gripClient,gripGoalMsg] = rosactionclient(ros_action_name);
+
+ROSobjects.gripAction.client = gripClient;
+ROSobjects.gripAction.goalMsg = gripGoalMsg;
 %% Algorithm description
 % sense ->  estimate environment -> segment -> identify-> plot -> move -> repeat
 inspectionPoses = cat(3, ...
     trvec2tform([0.4 -0.25 0.5]) * eul2tform(deg2rad([-160 10 0]), 'xyz'), ...
     trvec2tform([0.4 0.25 0.5]) * eul2tform(deg2rad([160 10 0]), 'xyz'));
 
-h=0.7;
+h=0.3;
 orient=[pi 0 0];
 blueBinPose = trvec2tform([-0.3 -0.45 h]) * eul2tform(orient,'xyz');
 greenBinPose = trvec2tform([-0.3 0.45 h]) * eul2tform(orient,'xyz');
@@ -71,37 +78,36 @@ zoneMiddle = trvec2tform([0.4 0 h]) * eul2tform(orient,'xyz');
 pcRoi = [0 1 -0.5 0.5 -0.15 0.3];
 pcWorld = sense(robot,ROSobjects,pcRoi);
 
+activateGripper('open',ROSobjects);
+
 run disposeFixedObjectsTask.m
 
-% job = batch('plotInfo.m')
-% clear job
+waypoints ={zoneLeft,greenBinPose,zoneLeft,zoneMiddle,zoneRight};
+for k=1:size(waypoints,2)
 
-% waypoints ={zoneLeft,greenBinPose,zoneLeft,zoneMiddle,zoneRight};
-% for k=1:size(waypoints,2)
-% 
-%    
-%     %% sense 
-%     [pcCurrent,img,q] = sense(robot,ROSobjects,pcRoi);
-%     
-%     %% estimate enviroment
-%     pcWorld = updateWorld(robot, ROSobjects,pcCurrent,pcWorld);
-%     
-%     %% segment
-%     distance = 0.05;
-%     [labels, numClusters] = pcsegdist(pcWorld, distance);
-%     msh = collisionMesh(pcWorld.Location);
-%     %% identify 
-%      
-%     pos_move = [0 0 -0.1];
-%     rot_move = [0 0 -pi / 10];
-% 
-%     MTH_target = waypoints{k};
-%     %% plot
-%     run plotInfo.m
-%     
-%     %% move 
-%     moveto(robot, q,MTH_target, ROSobjects)
-%     
-%     % display info
-%     disp("Number of clusters " + numClusters)
-% end
+   
+    %% sense 
+    [pcCurrent,img,q] = sense(robot,ROSobjects,pcRoi);
+    
+    %% estimate enviroment
+    pcWorld = updateWorld(robot, ROSobjects,pcCurrent,pcWorld);
+    
+    %% segment
+    distance = 0.05;
+    [labels, numClusters] = pcsegdist(pcWorld, distance);
+    msh = collisionMesh(pcWorld.Location);
+    %% identify 
+     
+    pos_move = [0 0 -0.1];
+    rot_move = [0 0 -pi / 10];
+
+    MTH_target = waypoints{k};
+    %% plot
+    run plotInfo.m
+    
+    %% move 
+    moveTo(robot, q,MTH_target, ROSobjects)
+    
+    % display info
+    disp("Number of clusters " + numClusters)
+end
