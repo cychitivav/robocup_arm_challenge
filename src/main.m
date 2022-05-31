@@ -1,26 +1,43 @@
 clear, clc, close all
 %% Connect to ROS Network
-device = rosdevice('localhost');
+device = rosdevice('localhost');                            %             
+
+device = rosdevice('192.168.182.130','user','password');    % virtual machine
 
 runfromMATLAB = true;
- 
+tic
 if ~isCoreRunning(device) && runfromMATLAB % run roslaunch ROSdistribution: Noetic
-    bashConfig='source /opt/ros/noetic/setup.bash; source ~/catkin_ws/devel/setup.bash';
-    bashLibraries = 'export LD_LIBRARY_PATH="~/catkin_ws/devel/lib:/opt/ros/noetic/lib"';
+%     bashConfig=['source /opt/ros/' ROS_DISTRO '/setup.bash; source ~/catkin_ws/devel/setup.bash'];
+%     bashLibraries = ['export LD_LIBRARY_PATH="~/catkin_ws/devel/lib:/opt/ros/' ROS_DISTRO  '/lib"'];
+%     bashRunGazebo = 'roslaunch kortex_gazebo_depth pickplace.launch world:=RoboCup_1.world';    
+%     %[status,cmdout] = 
+%     system(device,[bashConfig ';' bashLibraries ';' bashRunGazebo '&  echo $!; sleep 15'])
+    
+    bashROSinfo= 'export | grep ROS';
     bashRunGazebo = 'roslaunch kortex_gazebo_depth pickplace.launch world:=RoboCup_1.world';    
-    [status,cmdout] = system([bashConfig ';' bashLibraries ';' bashRunGazebo '&  echo $!'])
-    % system([ba    shConfig ';' bashLibraries ';' bashRunGazebo])
+    
+    command = ['printf " export DISPLAY=:0 \n' bashRunGazebo '>dump.txt& \n sleep 10 \n jobs -l \n disown #1  " > remotelaunch.bash; bash -i remotelaunch.bash  ; jobs -l '];
+    
+
+    system(device,command)
+    % kill ros process
     % system(['kill' cmdout]);   % end ros process 
-    % system('killall -9 -v rosmaster')
+    % system(device,'killall -9 -v rosmaster')
+    
+    pause(7)
+    system(device,'cat dump.txt')
+    % system(['kill' cmdout]);   % end ros process 
+    % system(device,'killall -9 -v rosmaster')
     pause(7)
     rosshutdown;
-    rosinit                 %('127.0.0.1',11311)
+    rosinit(device.DeviceAddress)
     setInitialConfig();
 
+else  
+    rosshutdown;
+    rosinit(device.DeviceAddress);
 end
-
-rosshutdown;
-rosinit                 %('127.0.0.1',11311)
+toc
 
 %% Load robot model
 load('exampleHelperKINOVAGen3GripperROSGazebo.mat');
@@ -60,6 +77,7 @@ ros_action_name = '/my_gen3/custom_gripper_controller/gripper_cmd';
 
 ROSobjects.gripAction.client = gripClient;
 ROSobjects.gripAction.goalMsg = gripGoalMsg;
+
 %% Algorithm description
 % sense ->  estimate environment -> segment -> identify-> plot -> move -> repeat
 inspectionPoses = cat(3, ...
@@ -80,7 +98,7 @@ pcWorld = sense(robot,ROSobjects,pcRoi);
 
 activateGripper('open',ROSobjects);
 
-run disposeFixedObjectsTask.m
+%run disposeFixedObjectsTask.m
 
 waypoints ={zoneLeft,greenBinPose,zoneLeft,zoneMiddle,zoneRight};
 for k=1:size(waypoints,2)

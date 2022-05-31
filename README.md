@@ -128,6 +128,9 @@ https://github.com/cychitivav/robocup_arm_challenge
 
 https://www.mathworks.com/help//ros/ug/work-with-specialized-ros-messages.html
 
+keep-processes running after ending ssh session
+https://askubuntu.com/questions/8653/how-to-keep-processes-running-after-ending-ssh-session
+ 
 -->
 
 KINOVA Gen3 manipulator
