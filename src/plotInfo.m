@@ -32,4 +32,10 @@ show(robot,q');
 hold off
 title('Isometric')
 view(30,30)
+
 axis tight
+
+
+figure(2)
+
+imshow(BW)
