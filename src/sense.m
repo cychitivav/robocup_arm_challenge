@@ -6,10 +6,13 @@ jntStateSub = ROSobjects.jntStateSub;
 
 % Receive images
 img = readImage(receive(ImgSub));
+BW = segmentImage(img);
 xyz = rosReadXYZ(receive(ptcSub));
+roi_xyz=reshape(permute(BW, [2, 1]), [],1 );
+
 
 % Clean data
-rowInvalid = any(isnan(xyz), 2);
+rowInvalid = or(any(isnan(xyz), 2), ~ roi_xyz);
 xyz(rowInvalid, :) = [];
 xyz = double(xyz);
 

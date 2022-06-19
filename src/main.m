@@ -5,7 +5,7 @@ device = rosdevice('localhost');                            %
 
 device = rosdevice('192.168.182.130','user','password');    % virtual machine
 
-runfromMATLAB = true;
+runfromMATLAB = false;
 tic
 if ~isCoreRunning(device) && runfromMATLAB 
     
@@ -84,14 +84,8 @@ inspectionPoses = cat(3, ...
 
 h=0.3;
 orient=[pi 0 0];
-blueBinPose = trvec2tform([-0.3 -0.45 h]) * eul2tform(orient,'xyz');
-greenBinPose = trvec2tform([-0.3 0.45 h]) * eul2tform(orient,'xyz');
 
-zoneLeft = trvec2tform([0.3 0.45 h]) * eul2tform(orient,'xyz');
-zoneRight = trvec2tform([0.4 0.3 h]) * eul2tform(orient,'xyz');
-zoneMiddle = trvec2tform([0.4 0 h]) * eul2tform(orient,'xyz');
-
-pcRoi = [0 1 -0.5 0.5 -0.15 0.3];
+pcRoi = [0 1 -0.5 0.5 -0.15 0.4];
 [pcWorld,img,q] = sense(robot,ROSobjects,pcRoi);
 depth = readImage(receive(ROSobjects.DepthSub));
 
@@ -104,12 +98,26 @@ run plotInfo.m
 activateGripper('open',ROSobjects);
 
 
-run disposeFixedObjectsTask.m
+%run disposeFixedObjectsTask.m
 
 
 %% Task 
+    figure()
+    distance = 0.05;
+    [labels, numClusters] = pcsegdist(pcWorld, distance);
+    pcshow(pcWorld.Location,labels)
+    colormap(hsv(numClusters))
 
-% waypoints ={zoneLeft,greenBinPose,zoneLeft,zoneMiddle,zoneRight};
+    msh={};
+    for k = 1:numClusters
+        xyzWorld = pcWorld.Location;
+        islabel = labels==k;
+        msh{k} = collisionMesh(xyzWorld(islabel,:));
+    end
+    
+    pcshow(pcWorld.Location(labels==1,:))
+
+        % waypoints ={zoneLeft,greenBinPose,zoneLeft,zoneMiddle,zoneRight};
 % 
 % for k=1:size(waypoints,2)
 % 
@@ -121,9 +129,7 @@ run disposeFixedObjectsTask.m
 %     pcWorld = updateWorld(robot, ROSobjects,pcCurrent,pcWorld);
 %     
 %     % segment
-%     distance = 0.05;
-%     [labels, numClusters] = pcsegdist(pcWorld, distance);
-%     msh = collisionMesh(pcWorld.Location);
+%     ;
 %     % identify 
 %      
 %     pos_move = [0 0 -0.1];
