@@ -1,11 +1,15 @@
-figure(1)
+% pcWorld, robot, q,img, BW, obj_pos
 
-xyzGlobal = pcWorld.Location;
+% load data
+
+figure(1)
 subplot(2,2,1)
 pcshow(pcWorld,'MarkerSize',10)
 hold on
 %show(m)
 show(robot,q');
+scatter3(posObj(1,:),posObj(2,:),posObj(3,:),'filled')
+    
 hold off
 title('Top')
 view(0,90)
@@ -19,6 +23,8 @@ pcshow(pcWorld,'MarkerSize',10)
 hold on
 %show(m)
 show(robot,q');
+scatter3(posObj(1,:),posObj(2,:),posObj(3,:),'filled')
+
 hold off
 title('Lateral')
 view(0,0)
@@ -29,6 +35,8 @@ pcshow(pcWorld,'MarkerSize',10)
 hold on
 %show(m)
 show(robot,q');
+scatter3(posObj(1,:),posObj(2,:),posObj(3,:),'filled')
+
 hold off
 title('Isometric')
 view(30,30)

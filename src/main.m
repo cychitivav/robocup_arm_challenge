@@ -88,35 +88,95 @@ orient=[pi 0 0];
 pcRoi = [0 1 -0.5 0.5 -0.15 0.4];
 [pcWorld,img,q] = sense(robot,ROSobjects,pcRoi);
 depth = readImage(receive(ROSobjects.DepthSub));
-
-save('data.mat','q','img','depth','pcWorld')
-
 BW = segmentImage(img);
+
+
+% segment
+distance = 0.05;
+[labels, numClusters] = pcsegdist(pcWorld, distance);
+    
+
+
+% save data
+pos = [0 0 0];
+orient = [0 0 0];
+trainData= table();
+posObj = [];
+
+envData= table();
+envData(end+1,:) = {pos,orient,q,img, depth, pcWorld, numClusters};
+
+lab=["f","b","l","b","l"];
+
+for k = 1:numClusters
+        
+        islabel = labels==k;
+        xyzObj = pcWorld.Location(islabel,:);
+        trainData(k,1) = {pointCloud(xyzObj)};
+        trainData(k,2) = {mean(xyzObj)};
+        posObj(k,:) =mean(xyzObj);
+        
+        %trainData(k,2) = {lab(k)};
+end
+
+
+
+save('data.mat','robot','pcWorld','q','img','posObj','depth','BW','trainData','envData')
+
 
 run plotInfo.m
 
-activateGripper('open',ROSobjects);
+%activateGripper('open',ROSobjects);
+
+%%
+    xyzWorld=pcWorld.Location;
+    figure()
+    pcshow(xyzWorld,labels)
+    hold on
+    scatter3(posObj(:,1),posObj(:,2),posObj(:,3),'filled','SizeData',100)
+    colormap(hsv(numClusters))
+    colorbar
+    hold off
+%%
+    Z = zscore(xyzWorld); % Standardized data
+    [general,score] = pca(Z);
+   
+    
+    msh={};
+
+figure()
+plot3(general(:,1),general(:,2),general(:,3))
+hold on
+    for k = 1:numClusters
+        islabel = labels==k;
+        local = pca(xyzWorld(islabel,:));
+        msh{k} = collisionMesh(xyzWorld(islabel,:));
+        plot3(local(:,1),local(:,2),local(:,3))
+    end     
+legend
 
 
 %run disposeFixedObjectsTask.m
+%%
+numPoints = pcWorld.Count;
+pointsDim = 3;
+numClasses = 3;
 
+lgraph = pointnetplusLayers(numPoints,pointsDim,numClasses, ...
+    NormalizationLayer="instance", ...
+    NumSetAbstractionModules=3, ...
+    NumClusters=2048, ...
+    ClusterRadius=0.1, ...
+    ClusterSize=32, ...
+    PointNetLayerSize=32);
+%analyzeNetwork(lgraph)
 
+%%
+% inputChannelSize = 3;
+% hiddenChannelSize1 = [64,128];
+% hiddenChannelSize2 = 256;
+% [parameters.InputTransform, state.InputTransform] = initializeTransform(inputChannelSize,hiddenChannelSize1,hiddenChannelSize2);
 %% Task 
-    figure()
-    distance = 0.05;
-    [labels, numClusters] = pcsegdist(pcWorld, distance);
-    pcshow(pcWorld.Location,labels)
-    colormap(hsv(numClusters))
-
-    msh={};
-    for k = 1:numClusters
-        xyzWorld = pcWorld.Location;
-        islabel = labels==k;
-        msh{k} = collisionMesh(xyzWorld(islabel,:));
-    end
-    
-    pcshow(pcWorld.Location(labels==1,:))
-
         % waypoints ={zoneLeft,greenBinPose,zoneLeft,zoneMiddle,zoneRight};
 % 
 % for k=1:size(waypoints,2)
