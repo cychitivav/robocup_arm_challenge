@@ -26,8 +26,8 @@ for i =1:size(s,2)
 
     MTH= trvec2tform(s(:,i)')*eul2tform(orient, 'xyz');
     [robotPos(i, :),var] = ik(endEffector, MTH, weights, initialGuess);
-    robotPos(i, :) = robotPos(i, :);
-    initialGuess = wrapToPi(robotPos(i, :));
+    robotPos(i, :) = wrapToPi(robotPos(i, :));
+    initialGuess = robotPos(i, :);
     
 end
 
