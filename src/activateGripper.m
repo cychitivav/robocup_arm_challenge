@@ -12,7 +12,7 @@ function activateGripper(state, ROSobjects)
     if strcmp(state,'open')  
         pos = 0.0;
     elseif strcmp(state,'close')
-        pos = 0.044;
+        pos = 0.04;
     else
         warning('Gripper action incorrect, available options [open,close]')
         return
@@ -24,5 +24,6 @@ function activateGripper(state, ROSobjects)
     
     gripGoal.Command = gripperCommand;
 
-    sendGoalAndWait(gripClient,gripGoal);
+    sendGoal(gripClient,gripGoal);
+    disp ("gripper command")
 end

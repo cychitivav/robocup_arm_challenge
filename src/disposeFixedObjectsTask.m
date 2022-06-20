@@ -1,31 +1,62 @@
-baseLinkPose = trvec2tform([-0.13 -0.1 0.6]);
 
-fixedObjects = cat(3, ...
-    trvec2tform([-0.1493 -0.6787 0.6138]) * eul2tform([0 pi/2 -pi/2], 'xyz'), ... Blue bottle
-    trvec2tform([-0.1015 0.373 0.6743]) * eul2tform([0 pi/2 pi/2], 'xyz'), ... Green can
-    trvec2tform([-0.1730 0.5161 0.5057]) * eul2tform([pi 0 pi/2], 'xyz'), ... Yellow bottle
-    trvec2tform([0.2240 0.4508 0.5854]) * eul2tform([pi 0 pi/4], 'xyz'), ... Red can
-    trvec2tform([0.2214 0.5998 0.5559]) * eul2tform([pi 0 pi/2], 'xyz')); % Red bottle
+pos_vec = [   -0.0193   -0.57    0.12
+    0.0285    0.4630    0.1200
+   -0.0430    0.6061    0.01
+    0.3540    0.5508    0.04
+    0.3514    0.6998    0.018];
+
+%pos_vec(:,1) = pos_vec(:,1) - 0.2
+
+orient_vec = [  0    pi   -pi/2;
+            0    pi    pi/2;
+            pi    0      pi/2;
+            pi    0      pi/4;
+            pi    0      pi/2];
+
+
+posBotlBin = [-0.3 -0.45 h];        % blue bin
+posCanBin = [-0.3 0.45 h];          % greeBin
 
 isBottle = [1 0 1 0 1]; % Blue bin
 
 jntStateSub = ROSobjects.jntStateSub;
 
-for i = 1:size(fixedObjects, 3)
-    q = receive(jntStateSub).Position(2:8);
+for i = 1:size(pos_vec,1)
+    
+    % pick
+    posTarget = pos_vec(i,:);
 
-    T = baseLinkPose\fixedObjects(:, :, i);
-    moveTo(robot, q, T, ROSobjects);
+    controlPoints = posTarget;
+    controlPoints(3) = controlPoints(3)+0.3;
+    controlPoints = [controlPoints; posTarget]';
+ 
+    
+    orient = orient_vec(i,:);
+
+    moveTo(robot,controlPoints, orient,ROSobjects)
 
     activateGripper('close', ROSobjects);
+    
+
+    % retract
 
     if isBottle(i)
-        q = receive(jntStateSub).Position(2:8);
-        moveTo(robot, q, blueBinPose, ROSobjects);
+       posBin = posBotlBin;
     else
-        q = receive(jntStateSub).Position(2:8);
-        moveTo(robot, q, greenBinPose, ROSobjects);
+       posBin= posCanBin;
     end
+
+    posTarget(3)=h; 
+    controlPoints = posTarget;
+    
+    posTarget(2)=posBin(2); 
+    controlPoints = [controlPoints;posTarget];
+
+
+    controlPoints = [controlPoints;posBin]';
+
+    moveTo(robot,controlPoints, orient,ROSobjects);
 
     activateGripper('open', ROSobjects);
 end
+

@@ -8,7 +8,7 @@ pcshow(pcWorld,'MarkerSize',10)
 hold on
 %show(m)
 show(robot,q');
-scatter3(controlPoints(1,:),controlPoints(1,:),controlPoints(1,:),'filled')
+plot3(controlPoints(1,:),controlPoints(1,:),controlPoints(1,:),'-*')
     
 hold off
 title('Top')
@@ -23,7 +23,7 @@ pcshow(pcWorld,'MarkerSize',10)
 hold on
 %show(m)
 show(robot,q');
-scatter3(controlPoints(1,:),controlPoints(1,:),controlPoints(1,:),'filled')
+plot3(controlPoints(1,:),controlPoints(1,:),controlPoints(1,:),'-*')
     
 hold off
 title('Lateral')
@@ -35,7 +35,7 @@ pcshow(pcWorld,'MarkerSize',10)
 hold on
 %show(m)
 show(robot,q');
-scatter3(controlPoints(1,:),controlPoints(1,:),controlPoints(1,:),'filled')
+plot3(controlPoints(1,:),controlPoints(1,:),controlPoints(1,:),'-*')
     
 hold off
 title('Isometric')
